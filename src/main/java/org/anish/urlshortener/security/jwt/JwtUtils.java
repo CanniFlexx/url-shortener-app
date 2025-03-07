@@ -39,13 +39,12 @@ public class JwtUtils {
                 .collect(Collectors.joining(","));
         return Jwts.builder()
                 .subject(username)
-                .claim("roles", roles) // Embeds roles as custom claims
-                .issuedAt(new Date()) // Token issue date
-                .expiration(new Date((new Date().getTime() + jwtExpirationMs))) // Expiration
-                .signWith(key()) // Signs token with secret key
-                .compact(); // Builds final JWT
+                .claim("roles", roles)
+                .issuedAt(new Date())
+                .expiration(new Date((new Date().getTime() + jwtExpirationMs)))
+                .signWith(key())
+                .compact();
     }
-
 
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser()
@@ -62,31 +61,13 @@ public class JwtUtils {
         try {
             Jwts.parser().verifyWith((SecretKey) key())
                     .build().parseSignedClaims(authToken);
-            return true; // Valid token
+            return true;
         } catch (JwtException e) {
-            throw new RuntimeException(e); // Token-related issues
+            throw new RuntimeException(e);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e); // Empty or null token
+            throw new RuntimeException(e);
         } catch (Exception e) {
-            throw new RuntimeException(e); // Other unexpected errors
+            throw new RuntimeException(e);
         }
     }
-
 }
-/*
-
-In short, this class:
-
-Extracts JWT from HTTP headers.
-Generates JWT with username and roles.
-Validates the JWT and checks expiration.
-Extracts the username from the token.
-Uses a secret key to sign and verify JWTs.
-
-*/
-
-//Refer to underlying concepts of: (for interview purposes) that have been used in this class.
-//Streams API
-//Functional programming (lambdas, method references)
-//Mapping and transformation
-//Collecting and reducing

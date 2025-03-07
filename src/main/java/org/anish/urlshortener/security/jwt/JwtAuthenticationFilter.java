@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,32 +28,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
         try {
-            //Steps:
-            // 1. Get JWT token from header
-            // 2. Validate token
-            // 3. Get user details from token if valid
-            // 4. Get user name -> load user -> set authentication context
             String jwt = jwtTokenProvider.getJwtFromHeader(request);
 
-            if(jwt != null && jwtTokenProvider.validateToken(jwt)) {
-                String username = jwtTokenProvider.getJwtFromHeader(request);
+            if (jwt != null && jwtTokenProvider.validateToken(jwt)){
+                String username = jwtTokenProvider.getUserNameFromJwtToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (userDetails != null) {
+                if (userDetails != null){
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         filterChain.doFilter(request, response);
-
     }
-
 }
 
 /* Class summary:
